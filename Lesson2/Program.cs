@@ -51,7 +51,11 @@ namespace Lesson2
         /// <returns></returns>
         static double MyPow(double number, int extent)
         {
-            if (number == 0) return 0;
+            if (number == 0)
+            {
+                if (extent == 0) return 1;
+                else return 0;
+            }
             else if (extent == 0) return 1;
             else
             {
@@ -73,7 +77,11 @@ namespace Lesson2
         /// <returns></returns>
         static double MyPowRec(double number, int extent)
         {
-            if (number == 0) return 0;
+            if (number == 0)
+            {
+                if (extent == 0) return 1;
+                else return 0;
+            }
             else if (extent == 0) return 1;
             else if (extent < 0)
             {
