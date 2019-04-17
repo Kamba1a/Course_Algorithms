@@ -58,7 +58,7 @@ namespace Lesson5
 
         public void Print()
         {
-            for (int i = 0; i<myStack.Length; i++)
+            for (int i = 0; i<Length; i++)
             {
                 Console.Write($"{myStack[i]} ");
             }
