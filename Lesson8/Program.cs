@@ -46,6 +46,49 @@ namespace Lesson8
             }
         }
 
+        /// <summary>
+        /// Меняет значения местами
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        static void Swap(ref int a, ref int b)
+        {
+            int t = a;
+            a = b;
+            b = t;
+        }
+
+        /// <summary>
+        /// Сортировка Хоара
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="tail"></param>
+        /// <param name="head"></param>
+        static void SortQuick(ref int[] array, int tail, int head)
+        {
+            int firstElem = tail;
+            int lastElem = head;
+            int supElem = array[tail];
+            while (true)
+            {
+                while (tail < head && array[tail] < supElem) tail++;
+                while (head > tail && array[head] >= supElem) head--;
+                if (tail >= head) break;
+                Swap(ref array[tail], ref array[head]);
+            }
+            if (lastElem - firstElem == 1) return;
+            if (array[tail] > supElem)
+            {
+                if (tail-1 > firstElem) SortQuick(ref array, firstElem, tail-1);
+                if (tail < lastElem) SortQuick(ref array, tail, lastElem);
+            }
+            else
+            {
+                if (tail > firstElem) SortQuick(ref array, firstElem, tail);
+                if (tail + 1 < lastElem) SortQuick(ref array, tail + 1, lastElem);
+            }
+        }
+
         static void Main(string[] args)
         {
             int ARR_SIZE = 25;
@@ -65,6 +108,21 @@ namespace Lesson8
             Console.WriteLine("\nМассив после сортировки подсчетом:");
             PrintArray(ref arr1);
 
+            #endregion
+
+
+
+            #region Задание 2:
+            //Реализовать быструю сортировку.
+            
+            int[] arr2 = new int[ARR_SIZE];
+            MAIN_ARR.CopyTo(arr2, 0);
+
+            SortQuick(ref arr2, 0, arr2.Length - 1);
+
+            Console.WriteLine("\nМассив после сортировки Хоара:");
+            PrintArray(ref arr2);
+            
             #endregion
 
 
