@@ -48,6 +48,114 @@ namespace Lesson4
             board[1, 1] = 1;
         }
 
+        /// <summary>
+        /// Вывод "доски"
+        /// </summary>
+        /// <param name="board"></param>
+        static void PrintBoard(ref int[,] board)
+        {
+            for (int i = 1; i < board.GetLength(1); i++)
+            {
+                for (int j = 1; j < board.GetLength(0); j++)
+                {
+                    Console.Write($"{board[i, j],4}");
+                }
+                Console.WriteLine("");
+            }
+        }
+
+        /// <summary>
+        /// Проверка возможности хода коня
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="horseMoveNumber"></param>
+        /// <returns></returns>
+        static bool CheckHorseMove(ref int[,] board, int a, int b, int horseMoveNumber)
+        {
+            for (int i = 1; i < board.GetLength(0); i++)
+            {
+                for (int j = 1; j < board.GetLength(1); j++)
+                {
+                    if (board[i, j] == horseMoveNumber - 1)
+                    {
+                        if (Math.Abs(a - i) == 1 && Math.Abs(b - j) == 2 || Math.Abs(a - i) == 2 && Math.Abs(b - j) == 1) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Проверка доски на обход конем всех клеток
+        /// </summary>
+        /// <param name="board"></param>
+        /// <returns></returns>
+        static bool CheckBoardFull(ref int[,] board)
+        {
+            for (int i = 1; i < board.GetLength(0); i++)
+            {
+                for (int j = 1; j < board.GetLength(1); j++)
+                {
+                    if (board[i, j] == 0) return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Обход конем шахматной доски v1
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="horseMoveNumber"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        static bool HorseMovementNonOptimiz(ref int[,] board, int horseMoveNumber, ref int count)
+        {
+            for (int i = 1; i < board.GetLength(1); i++)
+            {
+                for (int j = 1; j < board.GetLength(0); j++)
+                {
+                    count++;
+                    if (board[i, j] == 0 && CheckHorseMove(ref board, i, j, horseMoveNumber)) board[i, j] = horseMoveNumber;
+                    else continue;
+                    if (HorseMovementNonOptimiz(ref board, horseMoveNumber + 1, ref count)) return true;
+                    board[i, j] = 0;
+                }
+            }
+            if (CheckBoardFull(ref board)) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Обход конем шахматной доски v2
+        /// </summary>
+        /// <param name="board"></param>
+        /// <param name="horseMoveNumber"></param>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        static bool HorseMovementOptimiz(ref int[,] board, int horseMoveNumber, int a, int b, ref int count)
+        {
+            if (a < 1) a = 1;
+            for (int i = a; i < board.GetLength(1); i++)
+            {
+                if (b < 1) b = 1;
+                for (int j = b; j < board.GetLength(0); j++)
+                {
+                    count++;
+                    if (board[i, j] == 0 && CheckHorseMove(ref board, i, j, horseMoveNumber)) board[i, j] = horseMoveNumber;
+                    else continue;
+                    if (HorseMovementOptimiz(ref board, horseMoveNumber + 1, i - 2, j - 2, ref count)) return true;
+                    board[i, j] = 0;
+                }
+            }
+            if (CheckBoardFull(ref board)) return true;
+            return false;
+        }
+
         static void Main(string[] args)
         {
             #region Задание 1:
@@ -158,77 +266,31 @@ namespace Lesson4
             //    else return Math.Max(TotalSequenceCount(a, b + 1), TotalSequenceCount(a + 1, b));
             //}
             //Console.WriteLine(TotalSequenceCount(sequence1[0], sequence2[0]));
-            
+
             #endregion
 
-            #region Задание 3: (не рабочее - ошибка StackOverflowException)
+            #region Задание 3:
             //***Требуется обойти конём шахматную доску размером N × M, пройдя через все поля доски по одному разу.
             //Здесь алгоритм решения такой же, как и в задаче о 8 ферзях. Разница только в проверке положения коня.
-            /*
-            int size1 = 5;
-            int size2 = 5;
-            int[,] board2 = new int[size1+1, size2+1];
 
-            board2[1, 1] = 1;
+            int[,] board = new int[6, 6];           //шахматная доска (для быстроты используем 5х5)
+            int count = 0;                          //счетчик циклов
+            DateTime dt1 = new DateTime();
+            DateTime dt2 = new DateTime();
 
-            int CheckBoardFill()
-            {
-                for (int row = 1; row <= size1; row++)
-                {
-                    for (int col = 1; col <= size2; col++)
-                    {
-                        if (board2[row, col] == 0) return 0;
-                    }
-                }
-                return 1;
-            }
+            dt1 = DateTime.Now;
 
-            int TestMove(int x, int y, int lastRow, int lastCol)
-            {
-                if ((Math.Abs(x - lastRow) == 1) || (Math.Abs(x - lastRow) == 2) || (Math.Abs(y - lastRow) == 1) || (Math.Abs(y - lastRow) == 2))
-                {
-                    return 1;
-                }
-            return 0;
-            }
+            board[1, 1] = 1;
+            HorseMovementOptimiz(ref board, 2, 1, 1, ref count);       //90 280 циклов (443 млн циклов при полной доске 8х8 за 2м1с)
+            //HorseMovementNonOptimiz(ref board, 2, ref count);       //124 974 циклов (1 135 млн циклов при полной доске 8х8 за 3м37с)
 
-            int CheckPossiblityMove(int lastRow, int lastCol)
-            {
-                for (int row = 1; row <= size1; row++)
-                {
-                    for (int col = 1; col <= size2; col++)
-                    {
-                        if (board2[row, col]==0)
-                        {
-                            if (TestMove(row,col, lastRow, lastCol) == 1) return 1;
-                        }
-                    }
-                }
-                return 0;
-            }
+            dt2 = DateTime.Now;
 
-            int SearchSolution(int n, int lastRow, int lastCol)
-            {
-                if (CheckBoardFill() == 1) return 1;
-                if (CheckPossiblityMove(lastRow, lastCol) == 0) return 0;
-                for (int row = 1; row <= size1; row++)
-                {
-                    for (int col = 1; col <= size2; col++)
-                    {
-                        if (TestMove(row, col, lastRow, lastCol) == 1)
-                        {
-                            board2[row, col] = n;
-                            if (SearchSolution(n + 1, row, col) == 1) return 1;
-                            board2[row, col] = 0;
-                        }
-                    }
-                }
-                return 0;
-             }
+            Console.WriteLine($"Результат хода коня:");
+            PrintBoard(ref board);
+            Console.WriteLine($"Количество циклов: {count}");
+            Console.WriteLine($"Затраченное время: {dt2 - dt1}");
 
-            SearchSolution(1, 1, 1);
-            PrintArray(ref board2,1,1);
-            */
             #endregion
 
             Console.ReadKey();
